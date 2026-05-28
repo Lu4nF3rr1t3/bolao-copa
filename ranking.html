@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ranking</title>
+
+    <link rel="stylesheet" href="../style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+
+    <h1>🏆 Ranking</h1>
+
+    <div id="ranking"></div>
+
+    <script src="../supabase.js"></script>
+
+    <script>
+
+        async function loadRanking() {
+
+            const { data, error } = await supabaseClient
+                .from('predictions')
+                .select(`
+                    points,
+                    users(name)
+                `);
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            const ranking = {};
+
+            data.forEach(item => {
+
+                const name = item.users.name;
+
+                if (!ranking[name]) {
+                    ranking[name] = 0;
+                }
+
+                ranking[name] += item.points;
+            });
+
+            const sorted = Object.entries(ranking)
+                .sort((a, b) => b[1] - a[1]);
+
+            const div = document.getElementById('ranking');
+
+            sorted.forEach((player, index) => {
+
+                div.innerHTML += `
+                    <div class="match-card">
+                        <h2>
+                            ${index + 1}º - ${player[0]}
+                        </h2>
+
+                        <p>${player[1]} pontos</p>
+                    </div>
+                `;
+            });
+        }
+
+        loadRanking();
+
+    </script>
+
+</body>
+</html>
